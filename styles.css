@@ -1,0 +1,134 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #1d1c20;
+  color: white;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#wheel {
+  width: 960px;
+  height: 960px;
+  position: relative;
+  margin-bottom: 20px;
+  transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+  z-index: 1;
+}
+
+.marker {
+  position: absolute;
+  right: -60px;
+  top: 40%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 60px;
+  color: red;
+}
+
+.marker-dot {
+  position: absolute;
+  right: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+#drawBtn {
+  margin-top: 100px;
+  padding: 36px 120px;
+  font-size: 36px;
+  background: #e63946;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#drawBtn:hover {
+  background: #d62828;
+}
+
+#popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 999;
+}
+
+#popup h2 {
+  color: white;
+  margin-bottom: 20px;
+  font-size: 32px;
+}
+
+#popup img {
+  max-width: 300px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.confetti {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  animation: confetti 1.5s ease-out forwards;
+}
+
+@keyframes confetti {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(300px);
+  }
+}
+
+.remove-drawn-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 100;
+}
+
+.remove-drawn-container input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.remove-drawn-container label {
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
