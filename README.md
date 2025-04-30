@@ -7,6 +7,8 @@ OSU! Roulette
 ```
 OSU-Roulette/
 ├── src/
+│   ├── pages/
+│   │   └── index.html
 │   ├── js/
 │   │   └── script.js
 │   ├── css/
@@ -19,7 +21,7 @@ OSU-Roulette/
 ## Setup
 
 1. Clone the repository
-2. Open `index.html` in your web browser
+2. Open `index.html` in your web browser (it will automatically redirect to the main page)
 3. Enjoy the roulette game!
 
 ## Features
