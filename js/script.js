@@ -1,9 +1,12 @@
 const wheel = document.getElementById("wheel");
 const segments = 8;
 let options = ["Car", "Bike", "TV", "Phone", "Watch", "Trip", "Voucher", "Laptop"];
+const availableMods = ["EZ", "NF", "HT", "HR", "SD", "PF", "DT", "NC", "HD"];
 
 let currentOptions = [...options];
 let drawnSegments = new Set();
+let selectedMods = new Map(); // Track selected mods for each option
+
 const removeDrawnCheckbox = document.getElementById("removeDrawnCheckbox");
 const configBtn = document.getElementById("configBtn");
 const configPopup = document.getElementById("configPopup");
@@ -19,37 +22,147 @@ function initializeOptionsList() {
   });
 }
 
-// Create option input element
+function createModDropdowns(optionIndex) {
+  const modsContainer = document.createElement("div");
+  modsContainer.className = "mods-container";
+
+  // Initialize selected mods for this option if not exists
+  if (!selectedMods.has(optionIndex)) {
+    selectedMods.set(optionIndex, new Set());
+  }
+
+  const selectedModsForOption = selectedMods.get(optionIndex);
+  let visibleDropdowns = 0;
+
+  // Create all mod dropdowns but only show the first one
+  availableMods.forEach((mod, i) => {
+    const select = document.createElement("select");
+    select.className = "mod-select";
+    select.required = true;
+
+    // Add placeholder option
+    const placeholderOption = document.createElement("option");
+    placeholderOption.value = "";
+    placeholderOption.textContent = "Mod";
+    placeholderOption.disabled = true;
+    placeholderOption.selected = true;
+    placeholderOption.hidden = true;
+    select.appendChild(placeholderOption);
+
+    // Add available mods
+    availableMods.forEach((m) => {
+      const option = document.createElement("option");
+      option.value = m;
+      option.textContent = m;
+      option.disabled = selectedModsForOption.has(m);
+      select.appendChild(option);
+    });
+
+    // If this mod was previously selected, show and disable the dropdown
+    if (selectedModsForOption.has(mod)) {
+      select.value = mod;
+      select.disabled = true;
+      select.style.display = "block";
+      visibleDropdowns++;
+    } else if (visibleDropdowns === selectedModsForOption.size && visibleDropdowns === i) {
+      // Show only the first available dropdown
+      select.style.display = "block";
+    } else {
+      select.style.display = "none";
+    }
+
+    // Handle mod selection
+    select.addEventListener("change", () => {
+      if (select.value) {
+        // Add the selected mod to this option's set
+        selectedModsForOption.add(select.value);
+        selectedMods.set(optionIndex, selectedModsForOption); // Update the Map
+
+        // Disable the selected mod in all other dropdowns
+        const allSelects = modsContainer.querySelectorAll("select");
+        allSelects.forEach((s) => {
+          if (s !== select) {
+            const option = s.querySelector(`option[value="${select.value}"]`);
+            if (option) option.disabled = true;
+          }
+        });
+        select.disabled = true;
+
+        // Show the next dropdown if there is one
+        const nextSelect = select.nextElementSibling;
+        if (nextSelect) {
+          nextSelect.style.display = "block";
+        }
+
+        // Update the wheel to show the selected mods
+        createWheel();
+      }
+    });
+
+    modsContainer.appendChild(select);
+  });
+
+  return modsContainer;
+}
+
 function createOptionInput(value, index) {
-  const optionItem = document.createElement("div");
-  optionItem.className = "option-item";
+  const optionDiv = document.createElement("div");
+  optionDiv.className = "option-input";
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
 
   const input = document.createElement("input");
   input.type = "text";
   input.value = value;
   input.placeholder = "Enter option text";
 
-  input.addEventListener("input", (e) => {
-    options[index] = e.target.value;
+  const modsContainer = createModDropdowns(index);
+
+  optionDiv.appendChild(deleteBtn);
+  optionDiv.appendChild(input);
+  optionDiv.appendChild(modsContainer);
+  optionsContainer.appendChild(optionDiv);
+
+  // Update option text when input changes
+  input.addEventListener("input", () => {
+    options[index] = input.value;
     currentOptions = [...options];
     createWheel();
   });
 
-  optionItem.appendChild(input);
-  optionsContainer.appendChild(optionItem);
+  // Delete option when delete button is clicked
+  deleteBtn.addEventListener("click", () => {
+    if (options.length > 1) {
+      // Remove the option and its mods
+      options.splice(index, 1);
+      selectedMods.delete(index);
+
+      // Reindex the remaining mods
+      const newSelectedMods = new Map();
+      selectedMods.forEach((mods, oldIndex) => {
+        if (oldIndex > index) {
+          newSelectedMods.set(oldIndex - 1, mods);
+        } else if (oldIndex < index) {
+          newSelectedMods.set(oldIndex, mods);
+        }
+      });
+      selectedMods = newSelectedMods;
+
+      currentOptions = [...options];
+      initializeOptionsList();
+      createWheel();
+    }
+  });
 }
 
 // Add new option
 addOptionBtn.addEventListener("click", () => {
-  const newOption = `Option ${options.length + 1}`;
-  options.push(newOption);
+  options.push("New Option");
   currentOptions = [...options];
-  createOptionInput(newOption, options.length - 1);
+  initializeOptionsList();
   createWheel();
 });
-
-// Initialize the options list
-initializeOptionsList();
 
 // Configuration pop-up handlers
 configBtn.addEventListener("click", () => {
@@ -140,7 +253,12 @@ function createWheel() {
     text.setAttribute("text-anchor", "middle");
     text.setAttribute("alignment-baseline", "middle");
     text.setAttribute("transform", `rotate(${textAngle}, ${textX}, ${textY})`);
-    text.textContent = currentOptions[i];
+
+    // Get the option text and its mods
+    const optionText = currentOptions[i];
+    const selectedModsForOption = selectedMods.get(i) || new Set();
+    const modsText = selectedModsForOption.size > 0 ? ` [${Array.from(selectedModsForOption).join(", ")}]` : "";
+    text.textContent = optionText + modsText;
 
     svg.appendChild(text);
 
@@ -178,6 +296,9 @@ function createWheel() {
 
 // Initialize the wheel
 createWheel();
+
+// Initialize the options list
+initializeOptionsList();
 
 // Handle checkbox changes
 removeDrawnCheckbox.addEventListener("change", (e) => {

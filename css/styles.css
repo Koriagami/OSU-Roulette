@@ -176,7 +176,9 @@ body {
   background: #1d1c20;
   padding: 30px;
   border-radius: 10px;
-  width: 300px;
+  min-width: 300px;
+  width: auto;
+  max-width: 90vw;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -207,7 +209,9 @@ body {
 }
 
 .close-btn {
-  width: 100%;
+  width: 200px;
+  min-width: 200px;
+  max-width: 400px;
   padding: 10px;
   background: #e63946;
   color: white;
@@ -215,6 +219,9 @@ body {
   border-radius: 6px;
   cursor: pointer;
   transition: 0.3s;
+  margin: 40px auto 20px;
+  display: block;
+  font-size: 16px;
 }
 
 .close-btn:hover {
@@ -223,6 +230,7 @@ body {
 
 .options-list {
   margin: 20px 0;
+  width: 100%;
 }
 
 .options-list h3 {
@@ -231,34 +239,112 @@ body {
   font-size: 18px;
 }
 
-.option-item {
+.option-input {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
 }
 
-.option-item input {
-  flex: 1;
+.option-input input {
+  width: 200px;
+  min-width: 200px;
+  max-width: 400px;
   padding: 8px;
-  background: #2d2c30;
-  border: 1px solid #3d3c40;
+  border: none;
   border-radius: 4px;
+  background: #2d2c30;
   color: white;
   font-size: 14px;
 }
 
-.option-item input:focus {
-  outline: none;
-  border-color: #e63946;
+.option-input button {
+  background: #e63946;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  flex-shrink: 0;
+}
+
+.option-input button:hover {
+  background: #d62828;
+}
+
+.mods-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.mod-select {
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background: #2d2c30;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 60px;
+  display: none;
+}
+
+.mod-select:first-of-type {
+  display: block;
+}
+
+.mod-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mod-select option {
+  color: white;
+  background: #2d2c30;
+}
+
+.mod-select option[value=""] {
+  color: #666;
+  display: none;
+}
+
+.add-mod-btn {
+  background: #2d2c30;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-mod-btn:hover {
+  background: #3d3c40;
+}
+
+.add-mod-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.add-mod-btn i {
+  font-size: 14px;
 }
 
 .add-option-btn {
-  width: 100%;
+  width: 200px;
+  min-width: 200px;
+  max-width: 400px;
   padding: 10px;
-  background: #2d2c30;
+  background: #e63946;
   color: white;
-  border: 1px solid #3d3c40;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: 0.3s;
@@ -266,11 +352,12 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  margin: 10px auto;
+  font-size: 16px;
 }
 
 .add-option-btn:hover {
-  background: #3d3c40;
-  border-color: #e63946;
+  background: #d62828;
 }
 
 .add-option-btn i {
