@@ -2,31 +2,18 @@
 
 OSU! Roulette
 
-## Project Structure
-
-```
-OSU-Roulette/
-├── src/
-│   ├── pages/
-│   │   └── index.html
-│   ├── js/
-│   │   └── script.js
-│   ├── css/
-│   │   └── styles.css
-│   └── assets/
-├── index.html
-└── README.md
-```
-
 ## Setup
 
-1. Clone the repository
-2. Open `index.html` in your web browser (it will automatically redirect to the main page)
-3. Enjoy the roulette game!
+1. Clone the repository (or simply download archive and unpack)
+2. Open `index.html` (which is located at the `pages` folder) in your web browser
+3. Click `Settings` gear button to configure
+4. Enjoy the roulette!
 
 ## Features
 
 - Interactive roulette wheel
-- Prize drawing system
+- Map drawing system
 - Confetti animation on winning
-- Option to remove drawn segments
+- Configurable options
+- Option to remove already drawn segments
+- Option to add custom image for the winning prize by adding the beatmapset ID
