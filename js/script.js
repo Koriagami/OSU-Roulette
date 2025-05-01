@@ -14,6 +14,30 @@ const closeBtn = document.querySelector(".close-btn");
 const optionsContainer = document.getElementById("optionsContainer");
 const addOptionBtn = document.getElementById("addOptionBtn");
 
+// Add these functions at the top of the file, after the initial variable declarations
+function saveState() {
+  const state = {
+    options: options,
+    currentOptions: currentOptions,
+    drawnSegments: Array.from(drawnSegments),
+    selectedMods: Array.from(selectedMods.entries()).map(([key, value]) => [key, Array.from(value)]),
+  };
+  localStorage.setItem("rouletteState", JSON.stringify(state));
+}
+
+function loadState() {
+  const savedState = localStorage.getItem("rouletteState");
+  if (savedState) {
+    const state = JSON.parse(savedState);
+    options = state.options;
+    currentOptions = state.currentOptions;
+    drawnSegments = new Set(state.drawnSegments);
+    selectedMods = new Map(state.selectedMods.map(([key, value]) => [key, new Set(value)]));
+    return true;
+  }
+  return false;
+}
+
 // Initialize options list
 function initializeOptionsList() {
   optionsContainer.innerHTML = "";
@@ -96,6 +120,7 @@ function createModDropdowns(optionIndex) {
 
         // Update the wheel to show the selected mods
         createWheel();
+        saveState();
       }
     });
 
@@ -129,6 +154,7 @@ function createOptionInput(value, index) {
     options[index] = input.value;
     currentOptions = [...options];
     createWheel();
+    saveState();
   });
 
   // Delete option when delete button is clicked
@@ -152,6 +178,7 @@ function createOptionInput(value, index) {
       currentOptions = [...options];
       initializeOptionsList();
       createWheel();
+      saveState();
     }
   });
 }
@@ -162,6 +189,7 @@ addOptionBtn.addEventListener("click", () => {
   currentOptions = [...options];
   initializeOptionsList();
   createWheel();
+  saveState();
 });
 
 // Configuration pop-up handlers
@@ -184,6 +212,7 @@ function resetWheel() {
   currentOptions = [...options];
   drawnSegments.clear();
   createWheel();
+  saveState();
 }
 
 // Function to remove a drawn segment
@@ -193,6 +222,7 @@ function removeDrawnSegment(segmentIndex) {
   drawnSegments.add(segmentIndex);
   currentOptions = options.filter((_, index) => !drawnSegments.has(index));
   createWheel();
+  saveState();
 }
 
 // Function to create the wheel
@@ -452,3 +482,11 @@ function showConfetti() {
     });
   }, 250);
 }
+
+// Load state when the page loads
+document.addEventListener("DOMContentLoaded", () => {
+  if (loadState()) {
+    initializeOptionsList();
+    createWheel();
+  }
+});
