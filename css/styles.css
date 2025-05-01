@@ -246,18 +246,6 @@ body {
   margin-bottom: 10px;
 }
 
-.option-input input {
-  width: 200px;
-  min-width: 200px;
-  max-width: 400px;
-  padding: 8px;
-  border: none;
-  border-radius: 4px;
-  background: #2d2c30;
-  color: white;
-  font-size: 14px;
-}
-
 .option-input button {
   background: #e63946;
   color: white;
@@ -269,7 +257,35 @@ body {
   flex-shrink: 0;
 }
 
+.option-btn {
+  background: #e63946;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  flex-shrink: 0;
+}
+
+.option-input-field {
+  width: 200px;
+  min-width: 200px;
+  max-width: 400px;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background: #2d2c30;
+  color: white;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
 .option-input button:hover {
+  background: #d62828;
+}
+
+.option-btn:hover {
   background: #d62828;
 }
 
