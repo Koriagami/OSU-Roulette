@@ -33,8 +33,9 @@ function createModDropdowns(optionIndex) {
 
   const selectedModsForOption = selectedMods.get(optionIndex);
   let visibleDropdowns = 0;
+  let unpickedDropdownShown = false;
 
-  // Create all mod dropdowns but only show the first one
+  // Create all mod dropdowns
   availableMods.forEach((mod, i) => {
     const select = document.createElement("select");
     select.className = "mod-select";
@@ -64,14 +65,15 @@ function createModDropdowns(optionIndex) {
     removeOption.textContent = "Remove";
     select.appendChild(removeOption);
 
-    // If this mod was previously selected, show and set the value
+    // Show dropdowns based on selected mods
     if (selectedModsForOption.has(mod)) {
       select.value = mod;
       select.style.display = "block";
       visibleDropdowns++;
-    } else if (visibleDropdowns === selectedModsForOption.size && visibleDropdowns === i) {
-      // Show only the first available dropdown
+    } else if (!unpickedDropdownShown && visibleDropdowns === selectedModsForOption.size) {
+      // Show only one unpicked dropdown after all picked ones
       select.style.display = "block";
+      unpickedDropdownShown = true;
     } else {
       select.style.display = "none";
     }
