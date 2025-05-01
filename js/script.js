@@ -14,30 +14,6 @@ const closeBtn = document.querySelector(".close-btn");
 const optionsContainer = document.getElementById("optionsContainer");
 const addOptionBtn = document.getElementById("addOptionBtn");
 
-// Add these functions at the top of the file, after the initial variable declarations
-function saveState() {
-  const state = {
-    options: options,
-    currentOptions: currentOptions,
-    drawnSegments: Array.from(drawnSegments),
-    selectedMods: Array.from(selectedMods.entries()).map(([key, value]) => [key, Array.from(value)]),
-  };
-  localStorage.setItem("rouletteState", JSON.stringify(state));
-}
-
-function loadState() {
-  const savedState = localStorage.getItem("rouletteState");
-  if (savedState) {
-    const state = JSON.parse(savedState);
-    options = state.options;
-    currentOptions = state.currentOptions;
-    drawnSegments = new Set(state.drawnSegments);
-    selectedMods = new Map(state.selectedMods.map(([key, value]) => [key, new Set(value)]));
-    return true;
-  }
-  return false;
-}
-
 // Initialize options list
 function initializeOptionsList() {
   optionsContainer.innerHTML = "";
@@ -78,14 +54,19 @@ function createModDropdowns(optionIndex) {
       const option = document.createElement("option");
       option.value = m;
       option.textContent = m;
-      option.disabled = selectedModsForOption.has(m);
+      option.disabled = selectedModsForOption.has(m) && !select.value;
       select.appendChild(option);
     });
 
-    // If this mod was previously selected, show and disable the dropdown
+    // Add Remove option to all dropdowns
+    const removeOption = document.createElement("option");
+    removeOption.value = "Remove";
+    removeOption.textContent = "Remove";
+    select.appendChild(removeOption);
+
+    // If this mod was previously selected, show and set the value
     if (selectedModsForOption.has(mod)) {
       select.value = mod;
-      select.disabled = true;
       select.style.display = "block";
       visibleDropdowns++;
     } else if (visibleDropdowns === selectedModsForOption.size && visibleDropdowns === i) {
@@ -97,37 +78,92 @@ function createModDropdowns(optionIndex) {
 
     // Handle mod selection
     select.addEventListener("change", () => {
-      if (select.value) {
-        // Add the selected mod to this option's set
-        selectedModsForOption.add(select.value);
-        selectedMods.set(optionIndex, selectedModsForOption); // Update the Map
+      if (!select.value) return;
 
-        // Disable the selected mod in all other dropdowns
-        const allSelects = modsContainer.querySelectorAll("select");
-        allSelects.forEach((s) => {
-          if (s !== select) {
-            const option = s.querySelector(`option[value="${select.value}"]`);
-            if (option) option.disabled = true;
-          }
-        });
-        select.disabled = true;
+      const visibleSelects = Array.from(modsContainer.querySelectorAll("select")).filter((s) => s.style.display !== "none");
+      const isLastVisibleDropdown = visibleSelects.length === 1 && visibleSelects[0] === select;
+
+      // Handle mod removal
+      if (select.value === "Remove") {
+        // Remove the previously selected mod
+        if (select.dataset.previousValue) {
+          selectedModsForOption.delete(select.dataset.previousValue);
+        }
+
+        if (isLastVisibleDropdown) {
+          // For the last visible dropdown, reset to default state
+          select.value = "";
+          select.dataset.previousValue = "";
+          // Keep the dropdown visible but in default state
+          select.style.display = "block";
+        } else {
+          // For other dropdowns, hide them
+          select.style.display = "none";
+          select.value = "";
+          select.dataset.previousValue = "";
+        }
+      }
+      // Handle mod selection
+      else {
+        // Remove the previously selected mod if it exists
+        if (select.dataset.previousValue) {
+          selectedModsForOption.delete(select.dataset.previousValue);
+        }
+
+        // Add the new selected mod
+        selectedModsForOption.add(select.value);
+        select.dataset.previousValue = select.value;
 
         // Show the next dropdown if there is one
         const nextSelect = select.nextElementSibling;
         if (nextSelect) {
           nextSelect.style.display = "block";
         }
-
-        // Update the wheel to show the selected mods
-        createWheel();
-        saveState();
       }
+
+      // Update the selected mods map
+      selectedMods.set(optionIndex, selectedModsForOption);
+
+      // Update disabled states in all dropdowns
+      updateDropdownStates(modsContainer, selectedModsForOption);
+
+      // Update the wheel to show the selected mods
+      createWheel();
     });
 
     modsContainer.appendChild(select);
   });
 
+  // Initial update of dropdown states
+  updateDropdownStates(modsContainer, selectedModsForOption);
+
   return modsContainer;
+}
+
+// Helper function to update dropdown states
+function updateDropdownStates(modsContainer, selectedModsForOption) {
+  const allSelects = modsContainer.querySelectorAll("select");
+  const visibleSelects = Array.from(allSelects).filter((s) => s.style.display !== "none");
+
+  // Get all currently selected mods
+  const currentlySelectedMods = new Set();
+  visibleSelects.forEach((s) => {
+    if (s.value && s.value !== "Remove") {
+      currentlySelectedMods.add(s.value);
+    }
+  });
+
+  allSelects.forEach((s) => {
+    Array.from(s.options).forEach((opt) => {
+      if (opt.value === "Remove") {
+        // Never disable the Remove option
+        opt.disabled = false;
+      } else if (opt.value) {
+        // Only disable mods that are currently selected in other visible dropdowns
+        opt.disabled = currentlySelectedMods.has(opt.value) && s.value !== opt.value;
+      }
+    });
+  });
 }
 
 function createOptionInput(value, index) {
@@ -154,7 +190,6 @@ function createOptionInput(value, index) {
     options[index] = input.value;
     currentOptions = [...options];
     createWheel();
-    saveState();
   });
 
   // Delete option when delete button is clicked
@@ -178,7 +213,6 @@ function createOptionInput(value, index) {
       currentOptions = [...options];
       initializeOptionsList();
       createWheel();
-      saveState();
     }
   });
 }
@@ -189,7 +223,6 @@ addOptionBtn.addEventListener("click", () => {
   currentOptions = [...options];
   initializeOptionsList();
   createWheel();
-  saveState();
 });
 
 // Configuration pop-up handlers
@@ -212,7 +245,6 @@ function resetWheel() {
   currentOptions = [...options];
   drawnSegments.clear();
   createWheel();
-  saveState();
 }
 
 // Function to remove a drawn segment
@@ -222,7 +254,6 @@ function removeDrawnSegment(segmentIndex) {
   drawnSegments.add(segmentIndex);
   currentOptions = options.filter((_, index) => !drawnSegments.has(index));
   createWheel();
-  saveState();
 }
 
 // Function to create the wheel
@@ -329,6 +360,12 @@ createWheel();
 
 // Initialize the options list
 initializeOptionsList();
+
+// Reset state to default (no mods selected)
+selectedMods = new Map();
+options.forEach((_, index) => {
+  selectedMods.set(index, new Set());
+});
 
 // Handle checkbox changes
 removeDrawnCheckbox.addEventListener("change", (e) => {
@@ -485,8 +522,6 @@ function showConfetti() {
 
 // Load state when the page loads
 document.addEventListener("DOMContentLoaded", () => {
-  if (loadState()) {
-    initializeOptionsList();
-    createWheel();
-  }
+  initializeOptionsList();
+  createWheel();
 });
