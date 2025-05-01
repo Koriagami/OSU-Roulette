@@ -11,7 +11,7 @@ let customBeatmapOptions = new Set(); // Track options with custom beatmap image
 
 // Initialize prize images for default options
 options.forEach((option) => {
-  prizeImages[option] = `https://via.placeholder.com/300x200?text=${option}`;
+  prizeImages[option] = `https://assets.ppy.sh/beatmaps/1190710/covers/raw.jpg`;
 });
 
 const removeDrawnCheckbox = document.getElementById("removeDrawnCheckbox");
@@ -225,7 +225,7 @@ function createOptionInput(value, index) {
     imageBtn.style.display = "block";
     imageInput.value = ""; // Clear the input
     // Reset the prize image URL to default
-    prizeImages[value] = `https://via.placeholder.com/300x200?text=${value}`;
+    prizeImages[value] = `https://assets.ppy.sh/beatmaps/1190710/covers/raw.jpg`;
     customBeatmapOptions.delete(value);
   });
 
@@ -281,7 +281,7 @@ function createOptionInput(value, index) {
 addOptionBtn.addEventListener("click", () => {
   const newOption = "New Option";
   options.push(newOption);
-  prizeImages[newOption] = `https://via.placeholder.com/300x200?text=${newOption}`;
+  prizeImages[newOption] = `https://assets.ppy.sh/beatmaps/1190710/covers/raw.jpg`;
   currentOptions = [...options];
   initializeOptionsList();
   createWheel();
@@ -314,7 +314,25 @@ function removeDrawnSegment(segmentIndex) {
   if (currentOptions.length <= 1) return; // Don't remove if only one segment left
 
   drawnSegments.add(segmentIndex);
-  currentOptions = options.filter((_, index) => !drawnSegments.has(index));
+
+  // Create new arrays for options and mods
+  const newOptions = [];
+  const newSelectedMods = new Map();
+  let newIndex = 0;
+
+  // Rebuild options and mods arrays, skipping removed segments
+  options.forEach((option, index) => {
+    if (!drawnSegments.has(index)) {
+      newOptions.push(option);
+      if (selectedMods.has(index)) {
+        newSelectedMods.set(newIndex, selectedMods.get(index));
+      }
+      newIndex++;
+    }
+  });
+
+  currentOptions = newOptions;
+  selectedMods = newSelectedMods;
   createWheel();
 }
 
