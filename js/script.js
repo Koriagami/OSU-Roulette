@@ -6,6 +6,13 @@ const availableMods = ["EZ", "NF", "HT", "HR", "SD", "PF", "DT", "NC", "HD"];
 let currentOptions = [...options];
 let drawnSegments = new Set();
 let selectedMods = new Map(); // Track selected mods for each option
+let prizeImages = {}; // Initialize prizeImages object
+let customBeatmapOptions = new Set(); // Track options with custom beatmap images
+
+// Initialize prize images for default options
+options.forEach((option) => {
+  prizeImages[option] = `https://assets.ppy.sh/beatmaps/1190710/covers/raw.jpg`;
+});
 
 const removeDrawnCheckbox = document.getElementById("removeDrawnCheckbox");
 const configBtn = document.getElementById("configBtn");
@@ -175,6 +182,53 @@ function createOptionInput(value, index) {
   const deleteBtn = document.createElement("button");
   deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
 
+  const imageBtn = document.createElement("button");
+  imageBtn.innerHTML = '<i class="fas fa-image"></i>';
+  imageBtn.className = "option-btn";
+  imageBtn.style.display = customBeatmapOptions.has(value) ? "none" : "block";
+
+  const imageInput = document.createElement("input");
+  imageInput.type = "text";
+  imageInput.placeholder = "Enter Beatmapset ID";
+  imageInput.className = "option-input-field";
+  imageInput.style.display = "none";
+
+  const xBtn = document.createElement("button");
+  xBtn.innerHTML = '<i class="fas fa-times"></i>';
+  xBtn.className = "option-btn";
+  xBtn.style.display = customBeatmapOptions.has(value) ? "block" : "none";
+
+  // Handle image button click
+  imageBtn.addEventListener("click", () => {
+    imageBtn.style.display = "none";
+    imageInput.style.display = "block";
+    imageInput.focus();
+  });
+
+  // Handle image input enter key
+  imageInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      const beatMapSetID = imageInput.value.trim();
+      if (beatMapSetID) {
+        // Update the prize image URL for this option
+        prizeImages[value] = `https://assets.ppy.sh/beatmaps/${beatMapSetID}/covers/raw.jpg`;
+        customBeatmapOptions.add(value);
+        imageInput.style.display = "none";
+        xBtn.style.display = "block";
+      }
+    }
+  });
+
+  // Handle X button click
+  xBtn.addEventListener("click", () => {
+    xBtn.style.display = "none";
+    imageBtn.style.display = "block";
+    imageInput.value = ""; // Clear the input
+    // Reset the prize image URL to default
+    prizeImages[value] = `https://assets.ppy.sh/beatmaps/1190710/covers/raw.jpg`;
+    customBeatmapOptions.delete(value);
+  });
+
   const input = document.createElement("input");
   input.type = "text";
   input.value = value;
@@ -183,6 +237,9 @@ function createOptionInput(value, index) {
   const modsContainer = createModDropdowns(index);
 
   optionDiv.appendChild(deleteBtn);
+  optionDiv.appendChild(imageBtn);
+  optionDiv.appendChild(imageInput);
+  optionDiv.appendChild(xBtn);
   optionDiv.appendChild(input);
   optionDiv.appendChild(modsContainer);
   optionsContainer.appendChild(optionDiv);
@@ -198,6 +255,7 @@ function createOptionInput(value, index) {
   deleteBtn.addEventListener("click", () => {
     if (options.length > 1) {
       // Remove the option and its mods
+      customBeatmapOptions.delete(value);
       options.splice(index, 1);
       selectedMods.delete(index);
 
@@ -221,7 +279,9 @@ function createOptionInput(value, index) {
 
 // Add new option
 addOptionBtn.addEventListener("click", () => {
-  options.push("New Option");
+  const newOption = "New Option";
+  options.push(newOption);
+  prizeImages[newOption] = `https://assets.ppy.sh/beatmaps/1190710/covers/raw.jpg`;
   currentOptions = [...options];
   initializeOptionsList();
   createWheel();
@@ -254,7 +314,25 @@ function removeDrawnSegment(segmentIndex) {
   if (currentOptions.length <= 1) return; // Don't remove if only one segment left
 
   drawnSegments.add(segmentIndex);
-  currentOptions = options.filter((_, index) => !drawnSegments.has(index));
+
+  // Create new arrays for options and mods
+  const newOptions = [];
+  const newSelectedMods = new Map();
+  let newIndex = 0;
+
+  // Rebuild options and mods arrays, skipping removed segments
+  options.forEach((option, index) => {
+    if (!drawnSegments.has(index)) {
+      newOptions.push(option);
+      if (selectedMods.has(index)) {
+        newSelectedMods.set(newIndex, selectedMods.get(index));
+      }
+      newIndex++;
+    }
+  });
+
+  currentOptions = newOptions;
+  selectedMods = newSelectedMods;
   createWheel();
 }
 
@@ -446,8 +524,10 @@ document.getElementById("drawBtn").addEventListener("click", async () => {
     }
 
     showConfetti();
+    const selectedModsForPrize = selectedMods.get(options.indexOf(prize)) || new Set();
+    const prizeModsText = selectedModsForPrize.size > 0 ? ` [${Array.from(selectedModsForPrize).join(", ")}]` : "";
     document.getElementById("popup").innerHTML = `
-      <h2>🎉 You won: ${prize} 🎉</h2>
+      <h2>🎉 ${prize}${prizeModsText} 🎉</h2>
       <img src="${imageUrl}" alt="${prize}" />
     `;
     document.getElementById("popup").style.display = "flex";
@@ -456,18 +536,8 @@ document.getElementById("drawBtn").addEventListener("click", async () => {
   }, 4000);
 });
 
-// Simulated API call
+// Update the fetchPrizeImage function to use the global prizeImages
 async function fetchPrizeImage(prizeName) {
-  const prizeImages = {
-    Car: "https://via.placeholder.com/300x200?text=Car",
-    Bike: "https://via.placeholder.com/300x200?text=Bike",
-    TV: "https://via.placeholder.com/300x200?text=TV",
-    Phone: "https://via.placeholder.com/300x200?text=Phone",
-    Watch: "https://via.placeholder.com/300x200?text=Watch",
-    Trip: "https://via.placeholder.com/300x200?text=Trip",
-    Voucher: "https://via.placeholder.com/300x200?text=Voucher",
-    Laptop: "https://via.placeholder.com/300x200?text=Laptop",
-  };
   return new Promise((resolve) => {
     setTimeout(() => resolve(prizeImages[prizeName]), 500);
   });
