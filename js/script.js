@@ -33,12 +33,8 @@ function createModDropdowns(optionIndex) {
   const modsContainer = document.createElement("div");
   modsContainer.className = "mods-container";
 
-  // Initialize selected mods for this option if not exists
-  if (!selectedMods.has(optionIndex)) {
-    selectedMods.set(optionIndex, new Set());
-  }
-
-  const selectedModsForOption = selectedMods.get(optionIndex);
+  const optionValue = options[optionIndex];
+  const selectedModsForOption = selectedMods.get(optionValue) || new Set();
   let visibleDropdowns = 0;
   let unpickedDropdownShown = false;
 
@@ -96,7 +92,9 @@ function createModDropdowns(optionIndex) {
       if (select.value === "Remove") {
         // Remove the previously selected mod
         if (select.dataset.previousValue) {
-          selectedModsForOption.delete(select.dataset.previousValue);
+          const currentMods = selectedMods.get(optionValue) || new Set();
+          currentMods.delete(select.dataset.previousValue);
+          selectedMods.set(optionValue, currentMods);
         }
 
         if (isLastVisibleDropdown) {
@@ -116,11 +114,15 @@ function createModDropdowns(optionIndex) {
       else {
         // Remove the previously selected mod if it exists
         if (select.dataset.previousValue) {
-          selectedModsForOption.delete(select.dataset.previousValue);
+          const currentMods = selectedMods.get(optionValue) || new Set();
+          currentMods.delete(select.dataset.previousValue);
+          selectedMods.set(optionValue, currentMods);
         }
 
         // Add the new selected mod
-        selectedModsForOption.add(select.value);
+        const currentMods = selectedMods.get(optionValue) || new Set();
+        currentMods.add(select.value);
+        selectedMods.set(optionValue, currentMods);
         select.dataset.previousValue = select.value;
 
         // Show the next dropdown if there is one
@@ -130,12 +132,6 @@ function createModDropdowns(optionIndex) {
         }
       }
 
-      // Update the selected mods map
-      selectedMods.set(optionIndex, selectedModsForOption);
-
-      // Update disabled states in all dropdowns
-      updateDropdownStates(modsContainer, selectedModsForOption);
-
       // Update the wheel to show the selected mods
       createWheel();
     });
@@ -143,36 +139,7 @@ function createModDropdowns(optionIndex) {
     modsContainer.appendChild(select);
   });
 
-  // Initial update of dropdown states
-  updateDropdownStates(modsContainer, selectedModsForOption);
-
   return modsContainer;
-}
-
-// Helper function to update dropdown states
-function updateDropdownStates(modsContainer, selectedModsForOption) {
-  const allSelects = modsContainer.querySelectorAll("select");
-  const visibleSelects = Array.from(allSelects).filter((s) => s.style.display !== "none");
-
-  // Get all currently selected mods
-  const currentlySelectedMods = new Set();
-  visibleSelects.forEach((s) => {
-    if (s.value && s.value !== "Remove") {
-      currentlySelectedMods.add(s.value);
-    }
-  });
-
-  allSelects.forEach((s) => {
-    Array.from(s.options).forEach((opt) => {
-      if (opt.value === "Remove") {
-        // Never disable the Remove option
-        opt.disabled = false;
-      } else if (opt.value) {
-        // Only disable mods that are currently selected in other visible dropdowns
-        opt.disabled = currentlySelectedMods.has(opt.value) && s.value !== opt.value;
-      }
-    });
-  });
 }
 
 function createOptionInput(value, index) {
@@ -246,7 +213,17 @@ function createOptionInput(value, index) {
 
   // Update option text when input changes
   input.addEventListener("input", () => {
-    options[index] = input.value;
+    const oldValue = value;
+    value = input.value;
+    options[index] = value;
+
+    // Update mods mapping for the new option name
+    if (selectedMods.has(oldValue)) {
+      const mods = selectedMods.get(oldValue);
+      selectedMods.delete(oldValue);
+      selectedMods.set(value, mods);
+    }
+
     currentOptions = [...options];
     createWheel();
   });
@@ -256,19 +233,8 @@ function createOptionInput(value, index) {
     if (options.length > 1) {
       // Remove the option and its mods
       customBeatmapOptions.delete(value);
+      selectedMods.delete(value);
       options.splice(index, 1);
-      selectedMods.delete(index);
-
-      // Reindex the remaining mods
-      const newSelectedMods = new Map();
-      selectedMods.forEach((mods, oldIndex) => {
-        if (oldIndex > index) {
-          newSelectedMods.set(oldIndex - 1, mods);
-        } else if (oldIndex < index) {
-          newSelectedMods.set(oldIndex, mods);
-        }
-      });
-      selectedMods = newSelectedMods;
 
       currentOptions = [...options];
       initializeOptionsList();
@@ -314,25 +280,7 @@ function removeDrawnSegment(segmentIndex) {
   if (currentOptions.length <= 1) return; // Don't remove if only one segment left
 
   drawnSegments.add(segmentIndex);
-
-  // Create new arrays for options and mods
-  const newOptions = [];
-  const newSelectedMods = new Map();
-  let newIndex = 0;
-
-  // Rebuild options and mods arrays, skipping removed segments
-  options.forEach((option, index) => {
-    if (!drawnSegments.has(index)) {
-      newOptions.push(option);
-      if (selectedMods.has(index)) {
-        newSelectedMods.set(newIndex, selectedMods.get(index));
-      }
-      newIndex++;
-    }
-  });
-
-  currentOptions = newOptions;
-  selectedMods = newSelectedMods;
+  currentOptions = options.filter((_, index) => !drawnSegments.has(index));
   createWheel();
 }
 
@@ -397,7 +345,7 @@ function createWheel() {
 
     // Get the option text and its mods
     const optionText = currentOptions[i];
-    const selectedModsForOption = selectedMods.get(i) || new Set();
+    const selectedModsForOption = selectedMods.get(optionText) || new Set();
     const modsText = selectedModsForOption.size > 0 ? ` [${Array.from(selectedModsForOption).join(", ")}]` : "";
     text.textContent = optionText + modsText;
 
@@ -506,6 +454,10 @@ document.getElementById("drawBtn").addEventListener("click", async () => {
     const prize = currentOptions[selectedIndex];
     const imageUrl = await fetchPrizeImage(prize);
 
+    // Get mods for the prize
+    const selectedModsForPrize = selectedMods.get(prize) || new Set();
+    const prizeModsText = selectedModsForPrize.size > 0 ? ` [${Array.from(selectedModsForPrize).join(", ")}]` : "";
+
     // Highlight the closest white dot
     if (closestDot) {
       closestDot.setAttribute("r", "20");
@@ -519,13 +471,10 @@ document.getElementById("drawBtn").addEventListener("click", async () => {
 
     // Remove the drawn segment if the checkbox is checked
     if (removeDrawnCheckbox.checked) {
-      const originalIndex = options.indexOf(prize);
-      removeDrawnSegment(originalIndex);
+      removeDrawnSegment(selectedIndex);
     }
 
     showConfetti();
-    const selectedModsForPrize = selectedMods.get(options.indexOf(prize)) || new Set();
-    const prizeModsText = selectedModsForPrize.size > 0 ? ` [${Array.from(selectedModsForPrize).join(", ")}]` : "";
     document.getElementById("popup").innerHTML = `
       <h2>🎉 ${prize}${prizeModsText} 🎉</h2>
       <img src="${imageUrl}" alt="${prize}" />
