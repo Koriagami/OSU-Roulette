@@ -1,10 +1,70 @@
 const wheel = document.getElementById("wheel");
 const segments = 8;
-const options = ["Car", "Bike", "TV", "Phone", "Watch", "Trip", "Voucher", "Laptop"];
+let options = ["Car", "Bike", "TV", "Phone", "Watch", "Trip", "Voucher", "Laptop"];
 
 let currentOptions = [...options];
 let drawnSegments = new Set();
 const removeDrawnCheckbox = document.getElementById("removeDrawnCheckbox");
+const configBtn = document.getElementById("configBtn");
+const configPopup = document.getElementById("configPopup");
+const closeBtn = document.querySelector(".close-btn");
+const optionsContainer = document.getElementById("optionsContainer");
+const addOptionBtn = document.getElementById("addOptionBtn");
+
+// Initialize options list
+function initializeOptionsList() {
+  optionsContainer.innerHTML = "";
+  options.forEach((option, index) => {
+    createOptionInput(option, index);
+  });
+}
+
+// Create option input element
+function createOptionInput(value, index) {
+  const optionItem = document.createElement("div");
+  optionItem.className = "option-item";
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.value = value;
+  input.placeholder = "Enter option text";
+
+  input.addEventListener("input", (e) => {
+    options[index] = e.target.value;
+    currentOptions = [...options];
+    createWheel();
+  });
+
+  optionItem.appendChild(input);
+  optionsContainer.appendChild(optionItem);
+}
+
+// Add new option
+addOptionBtn.addEventListener("click", () => {
+  const newOption = `Option ${options.length + 1}`;
+  options.push(newOption);
+  currentOptions = [...options];
+  createOptionInput(newOption, options.length - 1);
+  createWheel();
+});
+
+// Initialize the options list
+initializeOptionsList();
+
+// Configuration pop-up handlers
+configBtn.addEventListener("click", () => {
+  configPopup.style.display = "flex";
+});
+
+closeBtn.addEventListener("click", () => {
+  configPopup.style.display = "none";
+});
+
+configPopup.addEventListener("click", (e) => {
+  if (e.target === configPopup) {
+    configPopup.style.display = "none";
+  }
+});
 
 // Function to reset the wheel
 function resetWheel() {

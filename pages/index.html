@@ -4,13 +4,14 @@
     <meta charset="UTF-8" />
     <title>Roulette Prize Draw</title>
     <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   </head>
   <body>
-    <div class="remove-drawn-container">
-      <input type="checkbox" id="removeDrawnCheckbox" />
-      <label for="removeDrawnCheckbox">Remove drawn segments</label>
-    </div>
+    <button id="configBtn" class="config-btn">
+      <i class="fas fa-cog"></i>
+    </button>
+
     <div class="container">
       <div class="marker">◀</div>
       <div id="wheel"></div>
@@ -19,6 +20,22 @@
 
     <div id="popup">
       <img id="prizeImg" src="" alt="Prize" />
+    </div>
+
+    <div id="configPopup" class="config-popup">
+      <div class="config-content">
+        <h2>Configuration</h2>
+        <div class="config-option">
+          <input type="checkbox" id="removeDrawnCheckbox" />
+          <label for="removeDrawnCheckbox">Remove drawn segments</label>
+        </div>
+        <div class="options-list">
+          <h3>Wheel Options</h3>
+          <div id="optionsContainer"></div>
+          <button id="addOptionBtn" class="add-option-btn"><i class="fas fa-plus"></i> Add Option</button>
+        </div>
+        <button class="close-btn">Close</button>
+      </div>
     </div>
 
     <script src="../js/script.js"></script>

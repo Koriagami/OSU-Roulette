@@ -132,3 +132,147 @@ body {
   font-size: 18px;
   cursor: pointer;
 }
+
+.config-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  background: #e63946;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: 0.3s;
+}
+
+.config-btn:hover {
+  background: #d62828;
+}
+
+.config-btn i {
+  color: white;
+  font-size: 20px;
+}
+
+.config-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.config-content {
+  background: #1d1c20;
+  padding: 30px;
+  border-radius: 10px;
+  width: 300px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.config-content h2 {
+  color: white;
+  margin-bottom: 20px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.config-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.config-option input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.config-option label {
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.close-btn {
+  width: 100%;
+  padding: 10px;
+  background: #e63946;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.close-btn:hover {
+  background: #d62828;
+}
+
+.options-list {
+  margin: 20px 0;
+}
+
+.options-list h3 {
+  color: white;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.option-item input {
+  flex: 1;
+  padding: 8px;
+  background: #2d2c30;
+  border: 1px solid #3d3c40;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+}
+
+.option-item input:focus {
+  outline: none;
+  border-color: #e63946;
+}
+
+.add-option-btn {
+  width: 100%;
+  padding: 10px;
+  background: #2d2c30;
+  color: white;
+  border: 1px solid #3d3c40;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-option-btn:hover {
+  background: #3d3c40;
+  border-color: #e63946;
+}
+
+.add-option-btn i {
+  font-size: 14px;
+}
