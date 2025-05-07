@@ -5,7 +5,7 @@ Simple local OSU! Roulette to draw maps for the tournaments an ordinary multi pl
 ## Setup
 
 1. Clone the repository (or simply download archive and unpack)
-2. Open `index.html` (which is located at the `pages` folder) in your web browser
+2. Open `index.html` (which is located at the `pages` folder) using your browser
 3. Click `Settings` gear button to configure
 4. Enjoy the roulette!
 
