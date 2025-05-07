@@ -1,6 +1,6 @@
 # OSU-Roulette
 
-OSU! Roulette
+Simple local OSU! Roulette to draw maps for the tournaments an ordinary multi plays
 
 ## Setup
 
