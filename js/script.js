@@ -236,6 +236,15 @@ function createOptionInput(value, index) {
       selectedMods.delete(value);
       options.splice(index, 1);
 
+      // Update indices for remaining options
+      const newSelectedMods = new Map();
+      options.forEach((option, newIndex) => {
+        if (selectedMods.has(option)) {
+          newSelectedMods.set(option, selectedMods.get(option));
+        }
+      });
+      selectedMods = newSelectedMods;
+
       currentOptions = [...options];
       initializeOptionsList();
       createWheel();
@@ -268,19 +277,27 @@ configPopup.addEventListener("click", (e) => {
   }
 });
 
-// Function to reset the wheel
-function resetWheel() {
-  currentOptions = [...options];
-  drawnSegments.clear();
-  createWheel();
-}
-
 // Function to remove a drawn segment
 function removeDrawnSegment(segmentIndex) {
   if (currentOptions.length <= 1) return; // Don't remove if only one segment left
 
-  drawnSegments.add(segmentIndex);
-  currentOptions = options.filter((_, index) => !drawnSegments.has(index));
+  // Get the actual option that was selected
+  const selectedOption = currentOptions[segmentIndex];
+
+  // Find the index of this option in the original options array
+  const originalIndex = options.indexOf(selectedOption);
+
+  if (originalIndex !== -1) {
+    drawnSegments.add(originalIndex);
+    currentOptions = options.filter((_, index) => !drawnSegments.has(index));
+    createWheel();
+  }
+}
+
+// Function to reset the wheel
+function resetWheel() {
+  currentOptions = [...options];
+  drawnSegments.clear();
   createWheel();
 }
 
