@@ -16,4 +16,4 @@ Simple local OSU! Roulette to draw maps for the tournaments an ordinary multi pl
 - Confetti animation on winning
 - Configurable options
 - Option to remove already drawn segments
-- Option to add custom image for the winning prize by adding the beatmapset ID
+- Option to add custom image for the winning map by adding the beatmapset ID
