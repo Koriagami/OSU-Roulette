@@ -2,6 +2,8 @@
 
 Simple local OSU! Roulette to draw maps for the tournaments an ordinary multi plays
 
+#### NOTE: This tool was "vibe coded" on the spot out of curiosity. All the code in this repo is 98% AI generated.
+
 ## Setup
 
 1. Clone the repository (or simply download archive and unpack)
